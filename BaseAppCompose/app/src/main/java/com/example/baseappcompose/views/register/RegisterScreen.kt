@@ -3,17 +3,17 @@ package com.example.baseappcompose.views.register
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.baseappcompose.Destinations.LOGIN
+import com.example.baseappcompose.R
 import com.example.baseappcompose.components.ButtonCommon
 import com.example.baseappcompose.components.EditTextCommon
 import com.example.baseappcompose.components.EditTextPasswordCommon
@@ -27,6 +27,10 @@ fun RegisterScreen(
     val nome = remember { mutableStateOf("") }
     val usuario = remember { mutableStateOf("") }
     val senha = remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    val viewModel = viewModel(RegisterViewModel::class.java)
+    if (viewModel.showSnackError) ShowSnack(scaffoldState = scaffoldState, viewModel = viewModel)
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
@@ -67,9 +71,13 @@ fun RegisterScreen(
                 modifier = Modifier.widthIn(100.dp, 250.dp)
             ) {
                 ButtonCommon(
-                    onClick = { navController.navigate(LOGIN) },
+                    //onClick = { navController.navigate(LOGIN) },
+                    onClick = {
+                              viewModel.registerUser(context, usuario.value, senha.value)
+                    },
                     text = "Registrar",
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = R.drawable.baseline_check
                 )
             }
 
@@ -99,9 +107,21 @@ fun RegisterScreen(
                     onClick = { navController.popBackStack(LOGIN, false) },
                     text = "Voltar",
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(Color.Transparent)
+                    colors = ButtonDefaults.buttonColors(Color.Transparent),
+                    icon = R.drawable.baseline_arrow_back_ios_new
                 )
             }
         }
+    }
+}
+
+@Composable
+fun ShowSnack(scaffoldState: ScaffoldState, viewModel: RegisterViewModel) {
+    LaunchedEffect(Unit) {
+        scaffoldState.snackbarHostState.showSnackbar(
+            message = "Houve um erro com o cadastro do usuário!!",
+            duration = SnackbarDuration.Short
+        )
+        viewModel.hideSnackBarError()
     }
 }
