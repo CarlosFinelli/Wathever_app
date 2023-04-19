@@ -30,7 +30,7 @@ class LoginViewModel : ViewModel() {
     }
 
     fun makeLogin(context: Context, login: String, senha: String) {
-        val url = ""
+        val url = "https://fredaugusto.com.br/centro40/olimpiada/whateverApp/users"
         val json = JSONObject()
         json.put("users_login", login)
         json.put("users_password", senha)
