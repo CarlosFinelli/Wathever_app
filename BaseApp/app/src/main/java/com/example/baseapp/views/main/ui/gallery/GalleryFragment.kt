@@ -2,6 +2,7 @@ package com.example.baseapp.views.main.ui.gallery
 
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -19,8 +20,10 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.baseapp.databinding.FragmentGalleryBinding
 import com.google.android.material.snackbar.Snackbar
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -36,6 +39,7 @@ class GalleryFragment : Fragment() {
     private var _binding: FragmentGalleryBinding? = null
     lateinit var viewModel: GalleryViewModel
     lateinit var currentPhotoPath: String
+    val GalleryFragment.packageManager get() = requireActivity().packageManager
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -59,6 +63,12 @@ class GalleryFragment : Fragment() {
         viewModel.loadData(requireContext(), binding)
 
         binding.btnAdd.setOnClickListener {
+            checkPermissions()
+        }
+        binding.imageClose.setOnClickListener {
+            binding.cardPhoto.visibility = View.GONE
+        }
+        binding.btnRetake.setOnClickListener {
             checkPermissions()
         }
     }
@@ -85,26 +95,48 @@ class GalleryFragment : Fragment() {
         }
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private fun dispatchTakePictureIntent() {
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also{ takePictureIntent ->
-            takePictureIntent.resolveActivity(requireActivity().packageManager)?.also {
-                val photoFile: File? = try {
-                    createImageFile()
-                } catch (e: IOException) {
-                    Snackbar.make(binding.root, "Houve um erro ao tirar a sua foto!!", Snackbar.LENGTH_LONG).show()
-                    null
-                }
-                photoFile?.also {
-                    val photoURI: Uri = FileProvider.getUriForFile(
-                        requireContext(),
-                        "com.example.baseapp.fileprovider",
-                        it
-                    )
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-                }
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        takePictureIntent.resolveActivity(packageManager)?.also {
+            val photoFile: File? = try {
+                createImageFile()
+            } catch (e: IOException) {
+                Snackbar.make(binding.root, "Houve um erro ao tirar a sua foto!!", Snackbar.LENGTH_LONG).show()
+                null
+            }
+            photoFile?.also {
+                val photoURI: Uri = FileProvider.getUriForFile(
+                    requireContext(),
+                    "com.example.baseapp.fileprovider",
+                    it
+                )
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                requireActivity().startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
             }
         }
+
+//        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also{ takePictureIntent ->
+//            takePictureIntent.resolveActivity(packageManager!!)?.also {
+//                val photoFile: File? = try {
+//                    createImageFile()
+//                } catch (e: IOException) {
+//                    Snackbar.make(binding.root, "Houve um erro ao tirar a sua foto!!", Snackbar.LENGTH_LONG).show()
+//                    null
+//                }
+//                photoFile?.also {
+//                    val photoURI: Uri = FileProvider.getUriForFile(
+//                        requireContext(),
+//                        "com.example.baseapp.fileprovider",
+//                        it
+//                    )
+//                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+//                    requireActivity().startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+//                }
+//            }
+//            startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), REQUEST_IMAGE_CAPTURE)
+//        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -118,7 +150,16 @@ class GalleryFragment : Fragment() {
                 }
 
                 RESULT_OK -> {
+                    val byteArrayOutputStream = ByteArrayOutputStream()
                     val imageBitmap = data!!.extras!!.get("data") as Bitmap
+                    imageBitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream)
+                    val bytes = byteArrayOutputStream.toByteArray()
+                    val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+                    binding.cardPhoto.visibility = View.VISIBLE
+                    binding.takenPicture.setImageBitmap(imageBitmap)
+                    binding.btnSave.setOnClickListener {
+                        viewModel.saveImage(requireContext(), binding, findNavController(), base64)
+                    }
                     // TODO
                     // Finalizar a lógica de salvamento da imagem e envio do BASE64 da imagem para a API
                 }
