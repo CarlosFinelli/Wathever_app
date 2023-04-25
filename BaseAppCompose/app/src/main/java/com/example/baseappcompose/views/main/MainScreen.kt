@@ -8,6 +8,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.baseappcompose.BottomNavigationBar
+import com.example.baseappcompose.Destinations
 import com.example.baseappcompose.Destinations.LOGIN
+import com.example.baseappcompose.classes.BottomNavItem
 import com.example.baseappcompose.components.ButtonCommon
 import com.example.baseappcompose.ui.theme.Shapes
 
@@ -30,8 +36,28 @@ fun MainScreen(navController: NavHostController) {
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+            .fillMaxSize(),
+            //.padding(16.dp),
+        bottomBar = {
+            BottomNavigationBar(
+                items = listOf(
+                    BottomNavItem(
+                        name = "Home",
+                        route = Destinations.MAIN,
+                        icon = Icons.Default.Home
+                    ),
+                    BottomNavItem(
+                        name = "Galeria",
+                        route = Destinations.GALLERY,
+                        icon = Icons.Default.ThumbUp
+                    )
+                ),
+                navController = navController,
+                onItemClick = {
+                    navController.navigate(it.route)
+                }
+            )
+        }
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

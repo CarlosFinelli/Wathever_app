@@ -3,6 +3,9 @@ package com.example.baseappcompose.views
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,9 +14,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.baseappcompose.BottomNavigationBar
+import com.example.baseappcompose.Destinations
 import com.example.baseappcompose.Destinations.MAIN
 import com.example.baseappcompose.Destinations.REGISTER
 import com.example.baseappcompose.R
+import com.example.baseappcompose.classes.BottomNavItem
 import com.example.baseappcompose.components.ButtonCommon
 import com.example.baseappcompose.components.EditTextCommon
 import com.example.baseappcompose.components.EditTextPasswordCommon
@@ -42,7 +48,8 @@ fun LoginScreen(navController: NavHostController) {
 
     Scaffold(scaffoldState = scaffoldState, modifier = Modifier
         .fillMaxSize()
-        .padding(16.dp)
+        .padding(16.dp),
+
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -83,14 +90,14 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.widthIn(100.dp, 250.dp)
             ) {
                 ButtonCommon(
-                    //onClick = { navController.navigate(MAIN) },
-                    onClick = {
-                              if(viewModel.isSnackBarShowing) {
-                                  viewModel.hideSnackBar()
-                              } else {
-                                  viewModel.showSnackBar()
-                              }
-                    },
+                    onClick = { navController.navigate(MAIN) },
+//                    onClick = {
+//                              if(viewModel.isSnackBarShowing) {
+//                                  viewModel.hideSnackBar()
+//                              } else {
+//                                  viewModel.showSnackBar()
+//                              }
+//                    },
                     text = "Entrar",
                     modifier = Modifier.fillMaxWidth(),
                     icon = R.drawable.baseline_login
